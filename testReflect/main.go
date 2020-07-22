@@ -1,6 +1,7 @@
 package main
 
-import(
+import (
+	"errors"
 	"fmt"
 	"reflect"
 )
@@ -12,7 +13,7 @@ type MyStruct struct {
 
 func foo0() int {
 	fmt.Println("runing foo0: ")
-	retrun 100
+	return 100
 }
 
 func foo1(a int) (string, string) {
@@ -25,7 +26,7 @@ func foo2(a, b int, c string) MyStruct {
 	return MyStruct{10, "ccc"}
 }
 
-func Call(m map[string]interface{}, name string, params ... interface{}) (result []reflect.Value, err error){
+func Call(m map[string]interface{}, name string, params ...interface{}) (result []reflect.Value, err error) {
 
 	f := reflect.ValueOf(m[name])
 	if len(params) != f.Type().NumIn() {
@@ -41,17 +42,29 @@ func Call(m map[string]interface{}, name string, params ... interface{}) (result
 	return
 }
 
-funcs := map[string]interface{}{
-	"foo":foo,
-	"foo1":foo1,
-	"foo2":foo2,
-}
+func main() {
 
-func main(){
+	funcs := map[string]interface{}{
+		"foo":  foo0,
+		"foo1": foo1,
+		"foo2": foo2,
+	}
 
-	if result, err := Call(funcs, "foo0"); err == nil {
+	if result, err := Call(funcs, "foo"); err == nil {
 		for _, r := range result {
-			fmt.Printf(" return: type=%v, value=[%d]\n", r,Type(), r.Int())
+			fmt.Printf(" return: type=%v, value=[%d]\n", r.Type(), r.Int())
+		}
+	}
+
+	if result, err := Call(funcs, "foo1", 10); err == nil {
+		for _, r := range result {
+			fmt.Printf(" return: type=%v, value=[%d]\n", r.Type(), r.String())
+		}
+	}
+
+	if result, err := Call(funcs, "foo2", 20, 30, "test"); err == nil {
+		for _, r := range result {
+			fmt.Printf(" return: type=%v, value=[%d]\n", r.Type(), r.Interface().(MyStruct))
 		}
 	}
 }
